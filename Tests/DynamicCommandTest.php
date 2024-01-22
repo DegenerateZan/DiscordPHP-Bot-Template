@@ -20,9 +20,11 @@ class DynamicCommandTest extends TestCase
 
         $testCase = $this;
 
+        $testCase->assertEquals(false, $ping->isExpired());
+
         $loop->addTimer(6, function () use ($ping, $testCase) {
 
-            $testCase->assertEquals(true, $ping->isCommandExpired());
+            $testCase->assertEquals(true, $ping->isExpired());
         });
 
         $loop->run();

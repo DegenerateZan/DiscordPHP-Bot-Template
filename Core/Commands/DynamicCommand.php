@@ -15,7 +15,7 @@ abstract class DynamicCommand
     protected $startTime;
 
     /**
-     * @var int The instance expiration UNIX time in seconds.
+     * @var int The UNIX time when the command instance is expired.
      */
     protected $endLimit;
 
@@ -80,7 +80,7 @@ abstract class DynamicCommand
      *
      * @return bool True if the command has expired, false otherwise.
      */
-    public function isCommandExpired(): bool
+    public function isExpired(): bool
     {
         $currentTime = time();
 
