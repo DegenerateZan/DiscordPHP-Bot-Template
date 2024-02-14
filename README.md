@@ -41,7 +41,7 @@ Copy the `.env.example` file to `.env` and add your bot token.
 Certainly! Below is an improved version of your documentation with clearer explanations and formatting:
 
 # Message Commands
-Before using message-based commands, it's important to understand the hierarchy and how they work. For more details, refer to [How it works and how to use it].
+Before using message-based commands, it's important to understand the hierarchy and how they work. For more details, refer to [How it works and how to use it](#how-it-works-and-how-to-use-it).
 
 ## Creating a Message Command
 To create a message-based command, create a class and attach the Core\Commands\MessageCommand attribute to it. Here's an example with a Ping command:
