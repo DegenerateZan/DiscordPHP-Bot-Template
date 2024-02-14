@@ -7,6 +7,10 @@ An unofficial way to structure a discordPHP bot.
 * [Installation](#installation)
 * [Important Resources](#important-resources)
 * [Configuration](#configuration)
+* [Message Commands](#message-commands)
+  *[Creating a Message Command](##creating-a-message-command)
+  *[How it works and how to use it](##how-it-works-and-how-to-use-it)
+  [Attaching Message-Based Commands](##attaching-message-based-commands)
 * [Slash Commands](#slash-commands)
 * [Events](#events)
 * [Disabling Commands and Events](#disabling-commands-and-events)
@@ -40,7 +44,7 @@ Certainly! Below is an improved version of your documentation with clearer expla
 # Message Commands
 Before using message-based commands, it's important to understand the hierarchy and how they work. For more details, refer to [How it works and how to use it].
 
-# Creating a Message Command
+## Creating a Message Command
 To create a message-based command, create a class and attach the Core\Commands\MessageCommand attribute to it. Here's an example with a Ping command:
 
 ```php
