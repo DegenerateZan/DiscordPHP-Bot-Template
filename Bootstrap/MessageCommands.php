@@ -11,13 +11,12 @@ $pingCommand = MessageCommandHandler::new()
     ->setDefaultMethod('sendPing');
 
 $testCommand = MessageCommandHandler::new()
-    ->setCommandName("test")
+    ->setCommandName('test')
     ->setCommandClass(Test::class);
 
 $commandRepository = new Core\Commands\MessageCommandRepository();
 
 $commandRepository->addHandler($pingCommand);
 $commandRepository->addHandler($testCommand);
-
 
 Env::get()->messageCommandRepository = $commandRepository;

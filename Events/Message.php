@@ -60,11 +60,13 @@ class Message implements MessageCreate
 
         if ($command->instance instanceof DynamicCommand) {
             $this->executeDynamicCommand($command->instance, $command->method, $message);
+
             return $command->instance;
         }
 
         if (method_exists($command->instance, $command->method)) {
             $this->executeStaticCommand($command->instance, $command->method, $message);
+
             return null;
         } else {
             $className = $command->instance::class;

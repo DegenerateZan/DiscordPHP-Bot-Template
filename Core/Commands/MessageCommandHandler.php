@@ -25,7 +25,7 @@ class MessageCommandHandler
     /**
      * @var string The default method name for the command.
      */
-    protected string $defaultMethod = "handle";
+    protected string $defaultMethod = 'handle';
 
     /**
      * @var array Associative array of subcommands and their associated method names.
@@ -182,8 +182,6 @@ class MessageCommandHandler
 
     /**
      * Get the Instance manager of the Command
-     * 
-     * @return InstanceManager|null 
      */
     public function getInstanceManager(): ?InstanceManager
     {

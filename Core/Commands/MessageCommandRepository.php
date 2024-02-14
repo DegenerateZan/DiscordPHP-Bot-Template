@@ -45,6 +45,7 @@ class MessageCommandRepository
 
         if ($this->hasHandler($commandName)) {
             $handler = $this->handlers[$commandName];
+
             return (object) [
                 'instance' => $handler->createInstance(),
                 'method' => $this->resolveMethod($handler, $subCommand),
@@ -131,8 +132,10 @@ class MessageCommandRepository
     {
         if (isset($this->handlers[$commandName])) {
             unset($this->handlers[$commandName]);
+
             return true;
         }
+
         return false;
     }
 }

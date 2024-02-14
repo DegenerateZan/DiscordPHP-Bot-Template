@@ -3,12 +3,9 @@
 namespace Core\Manager;
 
 use Core\Commands\DynamicCommand;
-use Discord\Builders\MessageBuilder;
 use React\EventLoop\LoopInterface;
 
 use function Core\debug;
-use function Core\discord;
-use function React\Async\await;
 
 /**
  * CommandExpirationManager is responsible for cleaning the instance of expired commands
