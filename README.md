@@ -85,10 +85,10 @@ it redirects to the specified subcommand method.
 Inside Bootstrap/MessageCommands.php, use a MessageCommandHandler to encapsulate your message-based command class.
 
 Methods:
-``setCommandName(string $commandName):`` Sets the name of the command.
-``setCommandClass(string $className):`` Sets the class associated with the command.
-``setDefaultMethod(string $methodName):`` Sets the default method of the command class.
-``addSubCommand(string $subCommandName, string $methodName):`` Adds a subcommand to the command.
+``setCommandName(string $commandName):`` Sets the name of the command.<br>
+``setCommandClass(string $className):`` Sets the class associated with the command.<br>
+``setDefaultMethod(string $methodName):`` Sets the default method of the command class.<br>
+``addSubCommand(string $subCommandName, string $methodName):`` Adds a subcommand to the command.<br>
 For advanced usage:
 
 ``setInstanceManager(InstanceManager $instanceManager):`` Sets the instance manager for the command.
