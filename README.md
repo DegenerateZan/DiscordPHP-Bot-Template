@@ -4,19 +4,18 @@ An unofficial way to structure a discordPHP bot.
 
 # Table of Contents
 
-* [Installation](#installation)
-* [Important Resources](#important-resources)
-* [Configuration](#configuration)
-* [Message Commands](#message-commands)
-  *[Creating a Message Command](##creating-a-message-command)
-  *[How it works and how to use it](##how-it-works-and-how-to-use-it)
-  [Attaching Message-Based Commands](##attaching-message-based-commands)
-* [Slash Commands](#slash-commands)
-* [Events](#events)
-* [Disabling Commands and Events](#disabling-commands-and-events)
-* [Extending The Template](#extending-the-template)
+- [Installation](#installation)
+- [Important Resources](#important-resources)
+- [Configuration](#configuration)
+- [Message Commands](#message-commands)
+  * [Creating a Message Command](#creating-a-message-command)
+  * [How it works and how to use it](#how-it-works-and-how-to-use-it)
+  * [Attaching Message-Based Commands](#attaching-message-based-commands)
+- [Slash Commands](#slash-commands)
+- [Events](#events)
+- [Disabling Commands and Events](#disabling-commands-and-events)
+- [Extending The Template](#extending-the-template)
   * [Bootstrap Sequence](#bootstrap-sequence)
-  * [Environment Variables](#environment-variables)
 
 # Installation
 
@@ -88,7 +87,7 @@ it redirects to the specified subcommand method.
 ## Attaching Message-Based Commands
 Inside Bootstrap/MessageCommands.php, use a MessageCommandHandler to encapsulate your message-based command class.
 
-Methods:
+Methods:<br>
 ``setCommandName(string $commandName):`` Sets the name of the command.<br>
 ``setCommandClass(string $className):`` Sets the class associated with the command.<br>
 ``setDefaultMethod(string $methodName):`` Sets the default method of the command class.<br>
