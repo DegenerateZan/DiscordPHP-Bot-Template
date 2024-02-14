@@ -2,15 +2,14 @@
 
 use Commands\Message\Ping;
 use Commands\Message\Test;
-use Core\Commands\MessageCommandHandler;
 use Core\Env;
 
-$pingCommand = MessageCommandHandler::new()
+$pingCommand = Core\Commands\MessageCommandHandler::new()
     ->setCommandName('ping')
     ->setCommandClass(Ping::class)
     ->setDefaultMethod('sendPing');
 
-$testCommand = MessageCommandHandler::new()
+$testCommand = Core\Commands\MessageCommandHandler::new()
     ->setCommandName('test')
     ->setCommandClass(Test::class);
 
