@@ -1,6 +1,7 @@
 <?php
 
 use Commands\Message\Ping;
+use Commands\Message\Test;
 use Core\Commands\MessageCommandHandler;
 use Core\Env;
 
@@ -9,8 +10,14 @@ $pingCommand = MessageCommandHandler::new()
     ->setCommandClass(Ping::class)
     ->setDefaultMethod('sendPing');
 
+$testCommand = MessageCommandHandler::new()
+    ->setCommandName("test")
+    ->setCommandClass(Test::class);
+
 $commandRepository = new Core\Commands\MessageCommandRepository();
 
-$commandRepository->addCommand($pingCommand);
+$commandRepository->addHandler($pingCommand);
+$commandRepository->addHandler($testCommand);
+
 
 Env::get()->messageCommandRepository = $commandRepository;

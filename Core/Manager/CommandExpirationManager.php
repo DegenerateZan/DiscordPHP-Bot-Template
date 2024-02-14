@@ -3,9 +3,12 @@
 namespace Core\Manager;
 
 use Core\Commands\DynamicCommand;
+use Discord\Builders\MessageBuilder;
 use React\EventLoop\LoopInterface;
 
 use function Core\debug;
+use function Core\discord;
+use function React\Async\await;
 
 /**
  * CommandExpirationManager is responsible for cleaning the instance of expired commands
@@ -15,7 +18,7 @@ class CommandExpirationManager
     /**
      * commandInstances
      *
-     * @var array<DynamicCommand>
+     * @var DynamicCommand[]
      */
     private $commandInstances = [];
 
@@ -24,6 +27,7 @@ class CommandExpirationManager
         $eventLoop->addPeriodicTimer($cleanupIntervalInMinutes * 60, function () {
             $this->cleanupCommands();
         });
+
     }
 
     public function addCommand(DynamicCommand $command): void

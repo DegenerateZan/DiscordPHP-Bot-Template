@@ -87,17 +87,4 @@ abstract class DynamicCommand
         return $currentTime > $this->endLimit;
     }
 
-    /**
-     * Destructor for DynamicCommand.
-     *
-     * Unsets associated properties inside the current object.
-     *
-     * @return void
-     */
-    public function __destruct()
-    {
-        foreach (get_object_vars($this) as $property => $value) {
-            unset($this->$property);
-        }
-    }
 }

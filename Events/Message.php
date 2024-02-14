@@ -18,22 +18,21 @@ use function core\discord as d;
 
 class Message implements MessageCreate
 {
-    private $commandExpirationManager;
-    private $commandPrefix;
-    private $messageCommandRepository;
+    private $expirationManager;
+    private $prefixManager;
+    private $commandRepository;
 
     public function __construct()
     {
-        $this->commandExpirationManager = new CommandExpirationManager(d()->getLoop());
-        $this->commandPrefix = Env::get()->prefixManager;
-        $this->messageCommandRepository = Env::get()->messageCommandRepository;
+        $this->expirationManager = new CommandExpirationManager(d()->getLoop(), 0.05);
+        $this->prefixManager = Env::get()->prefixManager;
+        $this->commandRepository = Env::get()->messageCommandRepository;
     }
 
     public function handle(ChannelMessage $message, Discord $discord): void
     {
-
         $guildId = $message->channel->guild_id;
-        $prefix = $this->commandPrefix->getPrefix($guildId);
+        $prefix = $this->prefixManager->getPrefix($guildId);
 
         if (strpos($message->content, $prefix) !== 0) {
             return;
@@ -47,13 +46,13 @@ class Message implements MessageCreate
         }
 
         if ($commandInstance instanceof DynamicCommand) {
-            $this->commandExpirationManager->addCommand($commandInstance);
+            $this->expirationManager->addCommand($commandInstance);
         }
     }
 
     private function handleCommand(ChannelMessage $message, string $commandName): ?DynamicCommand
     {
-        $command = $this->messageCommandRepository->getCommandMapping($commandName);
+        $command = $this->commandRepository->getCommandMapping($commandName);
 
         if (is_null($command)) {
             return null;
@@ -61,18 +60,16 @@ class Message implements MessageCreate
 
         if ($command->instance instanceof DynamicCommand) {
             $this->executeDynamicCommand($command->instance, $command->method, $message);
-
             return $command->instance;
         }
 
         if (method_exists($command->instance, $command->method)) {
             $this->executeStaticCommand($command->instance, $command->method, $message);
-
             return null;
         } else {
             $className = $command->instance::class;
             $methodName = $command->method;
-            throw new LogicException("The defined method '$methodName' of class '$className' for the command '$commandName' does not exist");
+            throw new LogicException("Method '$methodName' of class '$className' for command '$commandName' does not exist");
         }
     }
 
@@ -94,7 +91,7 @@ class Message implements MessageCreate
         $embed = (new Embed($discord))
             ->setTitle('Exception Caught')
             ->setDescription('An exception occurred while processing your request.')
-            ->setColor('#FF0000') // Set color to red using hexadecimal value
+            ->setColor('#FF0000')
             ->setFooter($discord->username)
             ->setTimestamp()
             ->addField(['name' => 'Type', 'value' => get_class($e)])

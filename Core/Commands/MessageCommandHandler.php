@@ -25,7 +25,7 @@ class MessageCommandHandler
     /**
      * @var string The default method name for the command.
      */
-    protected string $defaultMethod;
+    protected string $defaultMethod = "handle";
 
     /**
      * @var array Associative array of subcommands and their associated method names.
@@ -74,7 +74,7 @@ class MessageCommandHandler
      *
      * @return $this
      */
-    public function setDefaultMethod(string $methodName = 'handle'): self
+    public function setDefaultMethod(string $methodName): self
     {
         $this->defaultMethod = $methodName;
 
@@ -178,5 +178,15 @@ class MessageCommandHandler
         }
 
         return $this->instanceManager->createInstance();
+    }
+
+    /**
+     * Get the Instance manager of the Command
+     * 
+     * @return InstanceManager|null 
+     */
+    public function getInstanceManager(): ?InstanceManager
+    {
+        return $this->instanceManager;
     }
 }
