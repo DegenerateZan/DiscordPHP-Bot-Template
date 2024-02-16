@@ -34,7 +34,7 @@ abstract class SqlCompatibleDatabaseProvider implements DatabaseInterface
         ];
 
         /**
-         * Note: You can opt for a non-database mode by following these steps:
+         * Note: If you encourter an Error relating to Prefix You can opt for a non-database mode by following these steps:
          * - Disable the database-related lines inside Bootstrap/Database.php.
          * - Modify the PrefixManager to use JSON instead of the database in Bootstrap/Prefix.php.
          */

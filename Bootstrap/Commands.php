@@ -13,6 +13,7 @@ use function Core\loopClasses;
 $commandQueue = new CommandQueue();
 $discord = discord();
 loopClasses(BOT_ROOT . '/Commands/Slash', static function (string $className) use ($commandQueue) {
+    /** @var T|false */
     $attribute = doesClassHaveAttribute($className, Command::class);
     $disabled = doesClassHaveAttribute($className, Disabled::class);
 

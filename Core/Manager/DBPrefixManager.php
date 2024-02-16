@@ -10,12 +10,20 @@ use function Core\env;
 /**
  * To manage Prefixes using the database
  */
-class PrefixManager implements CommandPrefix
+class DbPrefixManager implements CommandPrefix
 {
+    /** @var array */
     private $cache = [];
+
+    /** @var DatabaseInterface */
     private $database;
+
+    /** @var string */
     private $defaultPrefix;
 
+    /**
+     * DBPrefixManager constructor.
+     */
     public function __construct(DatabaseInterface $database)
     {
         $this->database = $database;
@@ -24,7 +32,10 @@ class PrefixManager implements CommandPrefix
         $this->loadAllPrefixes();
     }
 
-    private function loadAllPrefixes()
+    /**
+     * Fetches and caches all guild prefixes from the database.
+     */
+    private function loadAllPrefixes(): void
     {
         // Fetch all guilds' prefixes from the database
         $result = $this->database->query('SELECT id, prefix FROM guilds')->fetchAll();
@@ -35,17 +46,23 @@ class PrefixManager implements CommandPrefix
         }
     }
 
+    /**
+     * Gets the prefix for a given guild.
+     */
     public function getPrefix(string $guildId): string
     {
-        // Check if prefix is cached, and
+        // Check if prefix is cached
         if (isset($this->cache[$guildId])) {
             return $this->cache[$guildId];
         }
 
-        // If a custom prefix is not set, use the default prefix,
+        // If a custom prefix is not set, use the default prefix
         return $this->defaultPrefix;
     }
 
+    /**
+     * Sets the prefix for a given guild.
+     */
     public function setPrefix(string $guildId, string $prefix): bool
     {
         // Update prefix in the cache

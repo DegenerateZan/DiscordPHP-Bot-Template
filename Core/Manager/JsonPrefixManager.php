@@ -7,9 +7,9 @@ use Core\Commands\CommandPrefix;
 use function Core\env;
 
 /**
- * To manage Prefixes using JSON, in case if you dont want to use an actual DB
+ * To manage Prefixes using JSON, in case if you don't want to use an actual DB
  *
- * The Schema that are needed
+ * The Schema that is needed
  * {
  * "guild_id_1": "prefix1",
  * "guild_id_2": "prefix2",
@@ -17,10 +17,18 @@ use function Core\env;
  */
 class JsonPrefixManager implements CommandPrefix
 {
+    /** @var array */
     private $cache = [];
+
+    /** @var string */
     private $jsonFileName;
+
+    /** @var string */
     private $defaultPrefix;
 
+    /**
+     * JsonPrefixManager constructor.
+     */
     public function __construct(string $jsonFileName)
     {
         $this->jsonFileName = $jsonFileName;
@@ -29,7 +37,10 @@ class JsonPrefixManager implements CommandPrefix
         $this->loadAllPrefixes();
     }
 
-    private function loadAllPrefixes()
+    /**
+     * Loads all prefixes from the JSON file into the cache.
+     */
+    private function loadAllPrefixes(): void
     {
         $jsonData = file_get_contents($this->jsonFileName);
 
@@ -41,13 +52,19 @@ class JsonPrefixManager implements CommandPrefix
         }
     }
 
-    private function saveAllPrefixes()
+    /**
+     * Saves all prefixes from the cache to the JSON file.
+     */
+    private function saveAllPrefixes(): void
     {
         $jsonData = json_encode($this->cache, JSON_PRETTY_PRINT);
 
         file_put_contents($this->jsonFileName, $jsonData);
     }
 
+    /**
+     * Gets the prefix for a given guild.
+     */
     public function getPrefix(string $guildId): string
     {
         if (isset($this->cache[$guildId])) {
@@ -57,6 +74,9 @@ class JsonPrefixManager implements CommandPrefix
         return $this->defaultPrefix;
     }
 
+    /**
+     * Sets the prefix for a given guild.
+     */
     public function setPrefix(string $guildId, string $prefix): bool
     {
         // Update prefix in the cache
@@ -65,6 +85,6 @@ class JsonPrefixManager implements CommandPrefix
         // Save the updated cache to the JSON file
         $this->saveAllPrefixes();
 
-        return true; // Assuming saving to the file always succeeds
+        return true;
     }
 }

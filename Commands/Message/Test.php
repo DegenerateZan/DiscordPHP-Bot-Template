@@ -2,27 +2,20 @@
 
 namespace Commands\Message;
 
-use Core\Commands\DynamicCommand;
+use Core\Commands\CommandConfig;
 use Discord\Builders\Components\ActionRow;
 use Discord\Builders\Components\Button;
 use Discord\Builders\MessageBuilder;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\Interactions\Interaction;
 use Core\Commands\MessageCommand;
+use Core\Commands\MessageCommandHandler;
 
 #[MessageCommand]
-class Test extends DynamicCommand
+class Test implements MessageCommandHandler
 {
-    private Message $message;
-
-    public function __construct()
+    public function handle(Message $message): void
     {
-        $this->setTimeLimit(time() + 0.5);
-    }
-
-    public function handle(Message $message)
-    {
-        $this->message = $message;
         $button = Button::new(Button::STYLE_PRIMARY)->setLabel('Bruh');
 
         $actionRow = new ActionRow();
@@ -37,5 +30,12 @@ class Test extends DynamicCommand
     private function sendMessage(Interaction $interaction)
     {
         $interaction->respondWithMessage(MessageBuilder::new()->setContent('Button has pressed'));
+    }
+
+    public function getConfig(): CommandConfig
+    {
+        return new CommandConfig('test', [
+            'showHelp' => false,
+        ]);
     }
 }

@@ -56,7 +56,7 @@ abstract class DynamicCommand
      *
      * @throws \LogicException If the time limit is less than the start time.
      */
-    public function setTimeLimit(int $timeLimit): void
+    public function setTimeLimit(int|float $timeLimit): void
     {
         if ($timeLimit < $this->startTime) {
             throw new \LogicException('Attempted to set a value less than the time the command was instantiated.');
