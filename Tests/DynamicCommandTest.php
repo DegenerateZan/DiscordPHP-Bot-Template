@@ -4,7 +4,7 @@ namespace Tests;
 
 namespace Tests;
 
-use Commands\Message\Ping;
+use Commands\Message\Test;
 use PHPUnit\Framework\TestCase;
 
 class DynamicCommandTest extends TestCase
@@ -12,17 +12,17 @@ class DynamicCommandTest extends TestCase
     public function testCheckExpired()
     {
         // Create a instance of a Command that has a Dynamic Type
-        $ping = new Ping();
+        $test = new Test();
         // Set the time expired of the command
-        $ping->setTimeLimit(time() + 5);
+        $test->setTimeLimit(time() + 5);
         //$ping->addTimeLimit(5);
         $loop = \React\EventLoop\Factory::create();
 
         $testCase = $this;
 
-        $loop->addTimer(6, function () use ($ping, $testCase) {
+        $loop->addTimer(6, function () use ($test, $testCase) {
 
-            $testCase->assertEquals(true, $ping->isExpired());
+            $testCase->assertEquals(true, $test->isExpired());
         });
 
         $loop->run();

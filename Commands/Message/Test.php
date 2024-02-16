@@ -3,6 +3,7 @@
 namespace Commands\Message;
 
 use Core\Commands\CommandConfig;
+use Core\Commands\DynamicCommand;
 use Discord\Builders\Components\ActionRow;
 use Discord\Builders\Components\Button;
 use Discord\Builders\MessageBuilder;
@@ -12,7 +13,7 @@ use Core\Commands\MessageCommand;
 use Core\Commands\MessageCommandHandler;
 
 #[MessageCommand]
-class Test implements MessageCommandHandler
+class Test extends DynamicCommand implements MessageCommandHandler
 {
     public function handle(Message $message): void
     {
