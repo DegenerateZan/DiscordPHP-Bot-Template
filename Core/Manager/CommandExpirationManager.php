@@ -15,7 +15,7 @@ class CommandExpirationManager
     /**
      * commandInstances
      *
-     * @var array<DynamicCommand>
+     * @var DynamicCommand[]
      */
     private $commandInstances = [];
 
@@ -24,6 +24,7 @@ class CommandExpirationManager
         $eventLoop->addPeriodicTimer($cleanupIntervalInMinutes * 60, function () {
             $this->cleanupCommands();
         });
+
     }
 
     public function addCommand(DynamicCommand $command): void

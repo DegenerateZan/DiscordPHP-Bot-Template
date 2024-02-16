@@ -274,3 +274,31 @@ function deleteAllFilesInDirectory(string $directory): void
         unlink($file);
     }
 }
+
+/**
+ * Creates a formatted code block with specified type and content.
+ *
+ * @param string $type           The type or language of the code block.
+ * @param string $content        The actual code content.
+ * @param int    $backTickAmount The number of backticks to use for the code block.
+ *
+ * @return string The formatted code block.
+ */
+function codeblockify($type, $content, $backTickAmount = 3, $removeNewLineAfterType = false)
+{
+    $backticks = str_repeat('`', $backTickAmount);
+
+    $codeBlock = "{$backticks}{$type}\n{$content}\n{$backticks}";
+
+    if ($removeNewLineAfterType) {
+        $codeBlock = "{$backticks}{$type}{$content}\n{$backticks}";
+
+    }
+
+    return $codeBlock;
+}
+
+function emptyValue()
+{
+    return "\u{200b}";
+}

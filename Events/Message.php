@@ -2,6 +2,7 @@
 
 namespace Events;
 
+use Core\Commands\CommandClient;
 use Core\Commands\DynamicCommand;
 use Core\Events\MessageCreate;
 use Core\Manager\CommandExpirationManager;
@@ -14,79 +15,78 @@ use LogicException;
 use Throwable;
 
 use function Core\env;
-use function core\discord as d;
+use function Core\discord as d;
 
 class Message implements MessageCreate
 {
-    private $commandExpirationManager;
-    private $commandPrefix;
-    private $messageCommandRepository;
+    private CommandExpirationManager $expirationManager;
+    private CommandClient $commandClient;
 
+    /**
+     * Message constructor.
+     */
     public function __construct()
     {
-        $this->commandExpirationManager = new CommandExpirationManager(d()->getLoop());
-        $this->commandPrefix = Env::get()->prefixManager;
-        $this->messageCommandRepository = Env::get()->messageCommandRepository;
+        $this->expirationManager = new CommandExpirationManager(d()->getLoop(), 0.05);
+        $this->commandClient = Env::get()->commandClient;
     }
 
     public function handle(ChannelMessage $message, Discord $discord): void
     {
+        $fullCommands = $this->commandClient->checkForPrefix($message);
+        if (is_null($fullCommands)) {
+            return;
+        }
+        [$commandName, $subCommand] = array_pad(explode(' ', $fullCommands, 3), 2, null);
 
-        $guildId = $message->channel->guild_id;
-        $prefix = $this->commandPrefix->getPrefix($guildId);
+        try {
+            $commandInstance = $this->handleCommand($message, $commandName);
+        } catch (Throwable $e) {
+            self::handleError($e, $message);
+            unset($commandInstance);
 
-        if (strpos($message->content, $prefix) !== 0) {
             return;
         }
 
-        $message->content = substr($message->content, strlen($prefix));
-        try {
-            $commandInstance = $this->handleCommand($message, $message->content);
-        } catch (Throwable $e) {
-            self::handleError($e, $message);
-        }
-
         if ($commandInstance instanceof DynamicCommand) {
-            $this->commandExpirationManager->addCommand($commandInstance);
+            $this->expirationManager->addCommand($commandInstance);
         }
     }
 
+    /**
+     * @throws LogicException
+     */
     private function handleCommand(ChannelMessage $message, string $commandName): ?DynamicCommand
     {
-        $command = $this->messageCommandRepository->getCommandMapping($commandName);
+        $command = $this->commandClient->getCommand($commandName);
+        $command->handle($message);
+
+        return null;
 
         if (is_null($command)) {
             return null;
         }
 
         if ($command->instance instanceof DynamicCommand) {
-            $this->executeDynamicCommand($command->instance, $command->method, $message);
+            $command->instance->$command->method($message);
 
             return $command->instance;
         }
 
         if (method_exists($command->instance, $command->method)) {
-            $this->executeStaticCommand($command->instance, $command->method, $message);
+            unset($command);
 
             return null;
         } else {
             $className = $command->instance::class;
             $methodName = $command->method;
-            throw new LogicException("The defined method '$methodName' of class '$className' for the command '$commandName' does not exist");
+            throw new LogicException("Method '$methodName' of class '$className' for command '$commandName' does not exist");
         }
     }
 
-    private function executeStaticCommand(object $commandInstance, string $methodName, ChannelMessage $message): void
-    {
-        $commandInstance->$methodName($message);
-        unset($commandInstance);
-    }
-
-    private function executeDynamicCommand(DynamicCommand $commandInstance, string $methodName, ChannelMessage $message): void
-    {
-        $commandInstance->$methodName($message);
-    }
-
+    /**
+     * Handles and logs errors.
+     */
     public static function handleError(Throwable $e, ChannelMessage $message): void
     {
         $discord = env()->discord;
@@ -94,7 +94,7 @@ class Message implements MessageCreate
         $embed = (new Embed($discord))
             ->setTitle('Exception Caught')
             ->setDescription('An exception occurred while processing your request.')
-            ->setColor('#FF0000') // Set color to red using hexadecimal value
+            ->setColor('#FF0000')
             ->setFooter($discord->username)
             ->setTimestamp()
             ->addField(['name' => 'Type', 'value' => get_class($e)])

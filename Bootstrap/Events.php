@@ -3,6 +3,7 @@
 use Core\Disabled;
 use Core\Events\Event;
 
+use function Core\debug;
 use function Core\discord;
 use function Core\doesClassHaveAttribute;
 use function Core\loopClasses;
@@ -38,6 +39,7 @@ loopClasses(BOT_ROOT . '/Events', static function (string $className) use ($even
         if ($eventName === null) {
             continue;
         }
+        debug('Begin adding Event from class ' . $event::class);
         $discord->on($eventName, $event->handle(...));
     }
 });

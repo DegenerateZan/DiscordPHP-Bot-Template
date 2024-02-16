@@ -1,16 +1,29 @@
 <?php
 
-use Commands\Message\Ping;
-use Core\Commands\MessageCommandHandler;
+use Core\Commands\CommandClient;
+use Core\Commands\MessageCommand;
+use Core\Disabled;
 use Core\Env;
 
-$pingCommand = MessageCommandHandler::new()
-    ->setCommandName('ping')
-    ->setCommandClass(Ping::class)
-    ->setDefaultMethod('sendPing');
+use function Core\discord;
+use function Core\doesClassHaveAttribute;
+use function Core\env;
+use function Core\loopClasses;
 
-$commandRepository = new Core\Commands\MessageCommandRepository();
+$mCommandClient = new CommandClient(env()->prefixManager);
+$discord = discord();
 
-$commandRepository->addCommand($pingCommand);
+loopClasses(BOT_ROOT . '/Commands/Message', static function (string $className) use ($mCommandClient) {
+    /** @var T|false */
+    $attribute = doesClassHaveAttribute($className, MessageCommand::class);
+    $disabled = doesClassHaveAttribute($className, Disabled::class);
 
-Env::get()->messageCommandRepository = $commandRepository;
+    if (!$attribute || $disabled !== false) {
+        return;
+    }
+    $mCommandClient->registerCommand(new $className());
+});
+
+$mCommandClient->buildHelpCommand();
+
+Env::get()->commandClient = $mCommandClient;

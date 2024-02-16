@@ -4,15 +4,18 @@ An unofficial way to structure a discordPHP bot.
 
 # Table of Contents
 
-* [Installation](#installation)
-* [Important Resources](#important-resources)
-* [Configuration](#configuration)
-* [Slash Commands](#slash-commands)
-* [Events](#events)
-* [Disabling Commands and Events](#disabling-commands-and-events)
-* [Extending The Template](#extending-the-template)
+- [Installation](#installation)
+- [Important Resources](#important-resources)
+- [Configuration](#configuration)
+- [Message Commands](#message-commands)
+  * [Creating a Message Command](#creating-a-message-command)
+  * [How it works and how to use it](#how-it-works-and-how-to-use-it)
+  * [Attaching Message-Based Commands](#attaching-message-based-commands)
+- [Slash Commands](#slash-commands)
+- [Events](#events)
+- [Disabling Commands and Events](#disabling-commands-and-events)
+- [Extending The Template](#extending-the-template)
   * [Bootstrap Sequence](#bootstrap-sequence)
-  * [Environment Variables](#environment-variables)
 
 # Installation
 
@@ -35,6 +38,78 @@ composer create-project commandstring/dphp-bot
 
 Copy the `.env.example` file to `.env` and add your bot token.
 
+Certainly! Below is an improved version of your documentation with clearer explanations and formatting:
+
+# Message Commands
+Before using message-based commands, it's important to understand the hierarchy and how they work. For more details, refer to [How it works and how to use it](#how-it-works-and-how-to-use-it).
+
+## Creating a Message Command
+To create a message-based command, create a class and attach the Core\Commands\MessageCommand attribute to it. Here's an example with a Ping command:
+
+```php
+<?php
+
+namespace Commands\Message;
+
+use Core\Commands\DynamicCommand;
+use Discord\Parts\Channel\Message;
+use Core\Commands\MessageCommand;
+
+#[MessageCommand]
+class Ping extends DynamicCommand
+{
+    public function handle(Message $message)
+    {
+        $message->reply('Pong!');
+    }
+
+    public function sendPing(Message $message)
+    {
+        $message->reply('**PONG!**');
+    }
+}
+```
+
+## How it works and how to use it
+Within a Discord channel, when you send a message in the format 
+```
+<prefix_bot>name_command
+```
+it redirects to the default method of the command class. 
+
+If you specify a subcommand with 
+```
+<prefix_bot>name_command subcommand_name
+``` 
+
+it redirects to the specified subcommand method.
+
+## Attaching Message-Based Commands
+Inside Bootstrap/MessageCommands.php, use a MessageCommandHandler to encapsulate your message-based command class.
+
+Methods:<br>
+``setCommandName(string $commandName):`` Sets the name of the command.<br>
+``setCommandClass(string $className):`` Sets the class associated with the command.<br>
+``setDefaultMethod(string $methodName):`` Sets the default method of the command class.<br>
+``addSubCommand(string $subCommandName, string $methodName):`` Adds a subcommand to the command.<br>
+For advanced usage:
+
+``setInstanceManager(InstanceManager $instanceManager):`` Sets the instance manager for the command.
+```php
+$pingCommandHandler = Core\Commands\MessageCommandHandler::new()
+    ->setCommandName('ping')
+    ->setCommandClass(Ping::class)
+    // ->setDefaultMethod('sendPing') // <-- By default, it invokes the "handle()" method if the default method is not explicitly set.
+    ->addSubCommand('custom', 'sendPing');
+```
+Assign the handler to the repository to process commands when the prefix is detected within the Message Event:
+
+```php
+$commandRepository = new Core\Commands\MessageCommandRepository();
+$commandRepository->addHandler($pingCommandHandler);
+Env::get()->messageCommandRepository = $commandRepository;
+```
+
 # Slash Commands
 
 Create a class that implements `Core\Commands\CommandHandler` and attach the `Core\Commands\Command` attribute to it.
@@ -42,7 +117,7 @@ Create a class that implements `Core\Commands\CommandHandler` and attach the `Co
 ```php
 <?php
 
-namespace Commands;
+namespace Commands\Slash;
 
 use Core\Commands\Command;
 use Core\Commands\CommandHandler;
