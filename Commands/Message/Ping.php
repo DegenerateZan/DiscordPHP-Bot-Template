@@ -19,7 +19,6 @@ class Ping implements MessageCommandHandler
     {
         return (new CommandConfig('ping', [
             'description' => 'Send ping message',
-            'usage' => '%s%s',
             'aliases' => ['huh', 'bruh'],
             'title' => 'Ping Command',
         ]))->addSubCommand('bruh', 'non exist method', [

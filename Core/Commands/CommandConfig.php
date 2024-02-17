@@ -138,6 +138,9 @@ class CommandConfig
                 'cooldownMessage' => 'Please wait %d second(s) to use this command again.',
                 'showHelp' => true,
             ]);
+        if (empty($this->subCommands)) {
+            $this->options['usage'] .= ' %s';
+        }
 
         return $resolver->resolve($options);
     }
@@ -169,7 +172,7 @@ class CommandConfig
                 'title' => 'Title Not Set!',
                 'description' => 'No description provided.',
                 'longDescription' => '',
-                'usage' => '%s%s <subcommand>',
+                'usage' => '%s%s',
                 'aliases' => [],
                 'cooldown' => 0,
                 'cooldownMessage' => 'Please wait %d second(s) to use this command again.',
@@ -183,7 +186,7 @@ class CommandConfig
     public function getHelp(): array|null
     {
         if (!$this->options['showHelp']) {
-            return null;
+            return [];
         }
         $options = $this->getCommandOptions();
 
@@ -191,7 +194,7 @@ class CommandConfig
             'name' => $options['title'],
             'description' => $options['description'],
             'longDescription' =>  $options['longDescription'],
-            'usage' => sprintf($options['usage'], '%s', $this->commandName),
+            'usage' => sprintf($options['usage'], '%s', $this->commandName, '%s'),
             'aliases' => [],
 
         ];
@@ -204,11 +207,11 @@ class CommandConfig
         }
 
         if (!$this->options['showHelp']) {
-            return null;
+            return [];
         }
 
         if (!$this->getSubCommandOptions($subCommandName)['showHelp']) {
-            return null;
+            return [];
         }
 
         $options = $this->getSubCommandOptions($subCommandName);

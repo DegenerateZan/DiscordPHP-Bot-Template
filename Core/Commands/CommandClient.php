@@ -8,6 +8,7 @@ use Discord\Discord;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\Embed\Embed;
+use LogicException;
 
 use function Core\codeblockify;
 use function Core\discord;
@@ -79,7 +80,12 @@ class CommandClient
                         $embedContent = "The command {$commandString} does not exist.";
 
                         continue;
+                    } elseif (count($newCommand->getConfig()->getHelp()) == 0) {
+                        $embedContent = "The help command for {$commandString} is not available.";
+
+                        continue;
                     }
+
                     $commandConfig = $newCommand->getConfig();
                     $help = $commandConfig->getHelp();
                     if (!is_null($newCommand) && !is_null($subCommandString)) {
@@ -101,7 +107,23 @@ class CommandClient
                     return;
                 }
 
-                $help['usage'] = sprintf($help['usage'], $this->commandPrefix->getPrefix($message->guild_id));
+                $stringFormatAmount = substr_count($help['usage'], '%s');
+
+                if ($stringFormatAmount == 2) {
+                    // Replace two occurrences of %s with command prefix and <subCommand>
+                    $help['usage'] = sprintf($help['usage'], $this->commandPrefix->getPrefix($message->guild_id), '<subCommand>');
+                } elseif ($stringFormatAmount == 1) {
+                    // Replace one occurrence of %s with only the command prefix
+                    $help['usage'] = sprintf($help['usage'], $this->commandPrefix->getPrefix($message->guild_id));
+                } elseif ($stringFormatAmount > 2) {
+                    // Replace the first two occurrences of %s with command prefix and <subCommand>,
+                    // and fill the remaining occurrences with empty strings
+                    $prefixAndSubCommand = array_merge([$this->commandPrefix->getPrefix($message->guild_id), '<subCommand>'], array_fill(0, $stringFormatAmount - 2, ''));
+                    $help['usage'] = vsprintf($help['usage'], $prefixAndSubCommand);
+                } else {
+                    // If there are no %s or less than 2 %s, throw an exception
+                    throw new LogicException('Invalid value of string format');
+                }
 
                 $usage = 'Syntax: ' . $help['usage'];
 
@@ -115,7 +137,7 @@ class CommandClient
                         $aliases[] = "{$prefix}{$alias}";
 
                     }
-                    if (!empty($help['aliases'])) {
+                    if (count($help['aliases']) != 0) {
                         foreach ($help['aliases'] as $alias) {
                             $aliases[] = "{$prefix}{$alias}";
                         }
@@ -126,8 +148,13 @@ class CommandClient
                         $concatedAliases[] = $prefix . $alias;
                     }
 
-                    $usage .= "\r\n" . \ngettext('Alias : ', 'Aliases : ', count($concatedAliases));
-                    $usage .= implode(', ', $concatedAliases);
+                    if (!empty($concatedAliases)) {
+
+                        $usage .= "\r\n" . \ngettext('Alias : ', 'Aliases : ', count($concatedAliases));
+                        $usage .= implode(', ', $concatedAliases);
+
+                    }
+
                 }
                 $usage = codeblockify('ansi', $usage);
                 $description = (!empty($help['longDescription'])) ? $help['longDescription'] : $help['description'];
@@ -163,31 +190,70 @@ class CommandClient
                 $embed->setDescription('List Commands');
             }
 
-            $commandsDescription = '';
+            $longestStringAmongAll = 0;
+            $tempFieldValues = [];
             $embedfields = [];
+
             /** @var MessageCommandHandler $command */
             foreach ($this->commands as $command) {
                 $help = $command->getConfig()->getHelp();
                 $allSubCommandHelp = $command->getConfig()->getAllSubCommandHelp();
-                if (empty($help)) {
+
+                if (empty($help['usage'])) {
                     continue;
                 }
 
-                $fieldValues = [];
+                // Parse string format of base command usage
+                $stringFormatAmount = substr_count($help['usage'], '%s');
+                $usage = ($stringFormatAmount > 1) ? sprintf(str_replace('%s', '', $help['usage'])) : sprintf($help['usage'], '');
 
-                $fieldValues[] = codeblockify('', sprintf($help['usage'] . "\t:", ''), 1, true) . $help['description'];
+                $allSubCommandsHelp = [];
+                $allSubCommandsUsage = [];
 
-                foreach ($allSubCommandHelp as $subCommandHelp) {
-                    $fieldValues[] = codeblockify('', sprintf($subCommandHelp['usage'] . "\t:", ''), 1, true) . $subCommandHelp['description'];
+                foreach ($allSubCommandHelp as $key => $subCommandHelp) {
+                    $allSubCommandsHelp[$key] = [
+                        'usage' => sprintf($subCommandHelp['usage'], ''),
+                        'description' => $subCommandHelp['description'],
+                    ];
+                    $allSubCommandsUsage[] = sprintf($subCommandHelp['usage'], '');
+                }
 
+                $longestString = (empty($allSubCommandsUsage)) ? 0 : max(array_map('strlen', $allSubCommandsUsage));
+                $longestStringAmongAll = max($longestStringAmongAll, $longestString);
+
+                $temp = [
+                    'name' => $help['name'],
+                    'usage' => $usage,
+                    'description' => $help['description'],
+                    'subCommands' => $allSubCommandsHelp,
+                ];
+
+                $tempFieldValues[] = $temp;
+            }
+
+            foreach ($tempFieldValues as $tempFieldValue) {
+                $name = $tempFieldValue['name'];
+                $usage = $tempFieldValue['usage'];
+                $len = $longestStringAmongAll - strlen($usage);
+                $usage = $usage . str_repeat(' ', ($len < 0) ? 0 : $len);
+
+                $fieldValues = ["``{$usage} :``" . $tempFieldValue['description']];
+
+                foreach ($tempFieldValue['subCommands'] as $subCommand) {
+                    $subCommandUsage = $subCommand['usage'];
+                    $len = $longestStringAmongAll - strlen($subCommandUsage);
+                    $subCommandUsage = $subCommandUsage . str_repeat(' ', ($len < 0) ? 0 : $len);
+
+                    $fieldValues[] = '``' . $subCommandUsage . ' :``' . $subCommand['description'];
                 }
 
                 $embedfields[] = [
-                    'name' => "__**{$help['name']}**__",
+                    'name' => "__**{$name}**__",
                     'value' => implode("\n", $fieldValues),
                     'inline' => false,
                 ];
             }
+
             // Use embed fields in case commands count is below limit
             if (count($embedfields) <= 25) {
                 foreach ($embedfields as $field) {
