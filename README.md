@@ -20,9 +20,6 @@ An unofficial way to structure a discordPHP bot.
 # Installation
 
 ```
-composer create-project commandstring/dphp-bot
-```
-
 # Important Resources #
 
 [DiscordPHP Class Reference](https://discord-php.github.io/DiscordPHP/guide/)
@@ -44,31 +41,41 @@ Certainly! Below is an improved version of your documentation with clearer expla
 Before using message-based commands, it's important to understand the hierarchy and how they work. For more details, refer to [How it works and how to use it](#how-it-works-and-how-to-use-it).
 
 ## Creating a Message Command
-To create a message-based command, create a class and attach the Core\Commands\MessageCommand attribute to it. Here's an example with a Ping command:
+To create a message-based command, create a class that implements `Core\Commands\CommandHandler` and attach the Core\Commands\MessageCommand attribute to it.
 
 ```php
 <?php
 
 namespace Commands\Message;
 
+use Core\Commands\CommandConfig;
 use Core\Commands\DynamicCommand;
 use Discord\Parts\Channel\Message;
 use Core\Commands\MessageCommand;
+use Core\Commands\MessageCommandHandler;
 
 #[MessageCommand]
-class Ping extends DynamicCommand
+class Ping extends DynamicCommand implements MessageCommandHandler
 {
-    public function handle(Message $message)
+    public function handle(Message $message): void
     {
-        $message->reply('Pong!');
+        $message->reply('Pong');
     }
 
-    public function sendPing(Message $message)
+    public function getConfig(): CommandConfig
     {
-        $message->reply('**PONG!**');
+        return (new CommandConfig())
+            ->setName('ping')
+            ->setDescription('Send ping message')
+            ->setAliases(['p'])
+            ->setTitle('Ping Command');
     }
 }
 ```
+
+Once you start the bot, it will automatically register the command with Discord.
+And if you make any changes to the config, it will update the command on the fly.
+
 
 ## How it works and how to use it
 Within a Discord channel, when you send a message in the format 
@@ -87,28 +94,6 @@ it redirects to the specified subcommand method.
 ## Attaching Message-Based Commands
 Inside Bootstrap/MessageCommands.php, use a MessageCommandHandler to encapsulate your message-based command class.
 
-Methods:<br>
-``setCommandName(string $commandName):`` Sets the name of the command.<br>
-``setCommandClass(string $className):`` Sets the class associated with the command.<br>
-``setDefaultMethod(string $methodName):`` Sets the default method of the command class.<br>
-``addSubCommand(string $subCommandName, string $methodName):`` Adds a subcommand to the command.<br>
-For advanced usage:
-
-``setInstanceManager(InstanceManager $instanceManager):`` Sets the instance manager for the command.
-```php
-$pingCommandHandler = Core\Commands\MessageCommandHandler::new()
-    ->setCommandName('ping')
-    ->setCommandClass(Ping::class)
-    // ->setDefaultMethod('sendPing') // <-- By default, it invokes the "handle()" method if the default method is not explicitly set.
-    ->addSubCommand('custom', 'sendPing');
-```
-Assign the handler to the repository to process commands when the prefix is detected within the Message Event:
-
-```php
-$commandRepository = new Core\Commands\MessageCommandRepository();
-$commandRepository->addHandler($pingCommandHandler);
-Env::get()->messageCommandRepository = $commandRepository;
-```
 
 # Slash Commands
 
@@ -172,8 +157,6 @@ class Ready implements Init
 }
 ```
 
-If the interface doesn't exist use the [Class Reference](https://discord-php.github.io/DiscordPHP/guide/events/index.html). Just create a interface that has a handle methods with args that match up with the ones in the event. Then sit it inside `/Core/Events`
-
 # Disabling Commands and Events
 
 If you want to disable a command handler or event listener attach the `Core\Commands\Disabled` attribute to it.
@@ -196,14 +179,14 @@ class Ready implements Init
 }
 ```
 
-# Extending The Template
+# Hot Reloading
 
-## Bootstrap Sequence
+This template has a built-in HMR (Hot Module Reloading) system.
+Which essentially means that while you're developing your
+bot.
 
-Create a file inside `/Bootstrap` and then require it inside of `/Boostrap/Requires.php`.
+The code will automatically be updated without having to restart the bot.
+Set HMR in your `.env` file to `true` to enable it. 
 
-## Environment Variables
+**Note: HMR only works on Commands and Events. (~~for now~~)**
 
-Add a doc comment to `/Core/Env.php` and then add the variable to `.env`
-
-*You should also add it to `.env.example`*
