@@ -69,16 +69,17 @@ class Message implements MessageCreate
         $subCommandConfig = $command->getConfig()->getSubCommand($subCommand);
 
         // check whether if subcommand is found
-        if (!is_null($subCommandConfig)){
+        if (!is_null($subCommandConfig)) {
             $methodName = $subCommandConfig->method;
         }
 
         $command->$methodName($message);
-        
+
         if ($command instanceof DynamicCommand) {
             return $command;
         } else {
             unset($command);
+
             return null;
         }
 

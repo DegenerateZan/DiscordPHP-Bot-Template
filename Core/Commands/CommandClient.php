@@ -50,8 +50,6 @@ class CommandClient
 
     }
 
-
-
     public function buildDefaultHelpCommand()
     {
         if ($this->commandClientOptions['defaultHelpCommand']) {
