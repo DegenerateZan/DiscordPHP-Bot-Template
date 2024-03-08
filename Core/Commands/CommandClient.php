@@ -50,6 +50,8 @@ class CommandClient
 
     }
 
+
+
     public function buildDefaultHelpCommand()
     {
         if ($this->commandClientOptions['defaultHelpCommand']) {
@@ -400,7 +402,7 @@ class CommandClient
     /**
      * Attempts to get a command, by the
      *
-     * @param string $command The command to get.
+     * @param string $command The command name to get.
      * @param bool   $aliases Whether to search aliases as well.
      *
      * @return MessageCommandHandler|null The command.

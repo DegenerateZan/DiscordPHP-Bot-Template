@@ -3,12 +3,13 @@
 namespace Commands\Message;
 
 use Core\Commands\CommandConfig;
+use Core\Commands\DynamicCommand;
 use Discord\Parts\Channel\Message;
 use Core\Commands\MessageCommand;
 use Core\Commands\MessageCommandHandler;
 
 #[MessageCommand]
-class Ping implements MessageCommandHandler
+class Ping extends DynamicCommand implements MessageCommandHandler
 {
     public function handle(Message $message): void
     {

@@ -8,9 +8,9 @@ use React\EventLoop\LoopInterface;
 use function Core\debug;
 
 /**
- * CommandExpirationManager is responsible for cleaning the instance of expired commands
+ * ExpirationManager is responsible for cleaning the instance of expired commands
  */
-class CommandExpirationManager
+class ExpirationManager
 {
     /**
      * commandInstances

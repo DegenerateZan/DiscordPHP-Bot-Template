@@ -5,7 +5,7 @@ namespace Events;
 use Core\Commands\CommandClient;
 use Core\Commands\DynamicCommand;
 use Core\Events\MessageCreate;
-use Core\Manager\CommandExpirationManager;
+use Core\Manager\ExpirationManager;
 use Core\Env;
 use Discord\Builders\MessageBuilder;
 use Discord\Discord;
@@ -19,7 +19,7 @@ use function Core\discord as d;
 
 class Message implements MessageCreate
 {
-    private CommandExpirationManager $expirationManager;
+    private ExpirationManager $expirationManager;
     private CommandClient $commandClient;
 
     /**
@@ -27,7 +27,7 @@ class Message implements MessageCreate
      */
     public function __construct()
     {
-        $this->expirationManager = new CommandExpirationManager(d()->getLoop(), 0.05);
+        $this->expirationManager = new ExpirationManager(d()->getLoop(), 0.05);
         $this->commandClient = Env::get()->commandClient;
     }
 
@@ -40,7 +40,7 @@ class Message implements MessageCreate
         [$commandName, $subCommand] = array_pad(explode(' ', $fullCommands, 3), 2, null);
 
         try {
-            $commandInstance = $this->handleCommand($message, $commandName);
+            $commandInstance = $this->handleCommand($message, $commandName, $subCommand);
         } catch (Throwable $e) {
             self::handleError($e, $message);
             unset($commandInstance);
@@ -56,36 +56,32 @@ class Message implements MessageCreate
     /**
      * @throws LogicException
      */
-    private function handleCommand(ChannelMessage $message, string $commandName): ?DynamicCommand
+    private function handleCommand(ChannelMessage $message, string $commandName, $subCommand): ?DynamicCommand
     {
 
         $command = $this->commandClient->getCommand($commandName);
         if (is_null($command)) {
             return null;
         }
-        $command->handle($message);
 
-        return null;
+        $methodName = $command->getConfig()->defaultMethod;
 
-        if (is_null($command)) {
-            return null;
+        $subCommandConfig = $command->getConfig()->getSubCommand($subCommand);
+
+        // check whether if subcommand is found
+        if (!is_null($subCommandConfig)){
+            $methodName = $subCommandConfig->method;
         }
 
-        if ($command->instance instanceof DynamicCommand) {
-            $command->instance->$command->method($message);
-
-            return $command->instance;
-        }
-
-        if (method_exists($command->instance, $command->method)) {
-            unset($command);
-
-            return null;
+        $command->$methodName($message);
+        
+        if ($command instanceof DynamicCommand) {
+            return $command;
         } else {
-            $className = $command->instance::class;
-            $methodName = $command->method;
-            throw new LogicException("Method '$methodName' of class '$className' for command '$commandName' does not exist");
+            unset($command);
+            return null;
         }
+
     }
 
     /**
