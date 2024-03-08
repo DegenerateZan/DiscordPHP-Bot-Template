@@ -12,16 +12,15 @@ class Ping implements MessageCommandHandler
 {
     public function handle(Message $message): void
     {
-
+        $message->reply('Pong');
     }
 
     public function getConfig(): CommandConfig
     {
-        return (new CommandConfig('ping', [
-            'description' => 'Send ping message',
-            'aliases' => ['huh', 'bruh'],
-            'title' => 'Ping Command',
-        ]))->addSubCommand('bruh', 'non exist method', [
-        ]);
+        return (new CommandConfig())
+            ->setName('ping')
+            ->setDescription('Send ping message')
+            ->setAliases(['p'])
+            ->setTitle('Ping Command');
     }
 }

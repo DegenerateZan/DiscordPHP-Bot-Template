@@ -35,8 +35,8 @@ class Test extends DynamicCommand implements MessageCommandHandler
 
     public function getConfig(): CommandConfig
     {
-        return new CommandConfig('test', [
-            'showHelp' => false,
-        ]);
+        return (new CommandConfig())
+            ->setName('test')
+            ->setTitle('bruh');
     }
 }

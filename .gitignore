@@ -21,3 +21,4 @@ composer.lock
 .env
 Core/HMR/Cached
 Cache
+temp

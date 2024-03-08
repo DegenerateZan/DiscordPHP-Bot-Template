@@ -58,7 +58,11 @@ class Message implements MessageCreate
      */
     private function handleCommand(ChannelMessage $message, string $commandName): ?DynamicCommand
     {
+
         $command = $this->commandClient->getCommand($commandName);
+        if (is_null($command)) {
+            return null;
+        }
         $command->handle($message);
 
         return null;

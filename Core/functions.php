@@ -278,9 +278,10 @@ function deleteAllFilesInDirectory(string $directory): void
 /**
  * Creates a formatted code block with specified type and content.
  *
- * @param string $type           The type or language of the code block.
- * @param string $content        The actual code content.
- * @param int    $backTickAmount The number of backticks to use for the code block.
+ * @param string $type                      The type or language of the code block.
+ * @param string $content                   The actual code content.
+ * @param int    $backTickAmount            The number of backticks to use for the code block.
+ * @param bool   $removeNewLineAfterType    To set newline after type
  *
  * @return string The formatted code block.
  */
@@ -301,4 +302,20 @@ function codeblockify($type, $content, $backTickAmount = 3, $removeNewLineAfterT
 function emptyValue()
 {
     return "\u{200b}";
+}
+
+/**
+ * Patch for the lacks of 'ngettext' function on stupid Linux port
+ **/
+function ngettext($singular, $plural, $number)
+{
+    $currentLocale = setlocale(LC_NUMERIC, 0);
+    $pluralForm = $number != 1 ? 1 : 0;
+    $formattedMessage = $pluralForm === 0 ? $singular : $plural;
+
+    if ($currentLocale) {
+        setlocale(LC_NUMERIC, $currentLocale);
+    }
+
+    return sprintf($formattedMessage, $number);
 }

@@ -2,6 +2,7 @@
 
 use Core\Commands\CommandClient;
 use Core\Commands\MessageCommand;
+use Core\Commands\MessageCommandHandler;
 use Core\Disabled;
 use Core\Env;
 
@@ -11,6 +12,7 @@ use function Core\env;
 use function Core\loopClasses;
 
 $mCommandClient = new CommandClient(env()->prefixManager);
+
 $discord = discord();
 
 loopClasses(BOT_ROOT . '/Commands/Message', static function (string $className) use ($mCommandClient) {
@@ -21,9 +23,17 @@ loopClasses(BOT_ROOT . '/Commands/Message', static function (string $className) 
     if (!$attribute || $disabled !== false) {
         return;
     }
-    $mCommandClient->registerCommand(new $className());
+
+    /** @var MessageCommandHandler $mCommand */
+    $mCommand = new $className();
+    $mCommandClient->registerCommand($mCommand);
+
+    $config = $mCommand->getConfig();
+    foreach ($config->aliases as $alias) {
+        $mCommandClient->registerAlias($alias, $config->commandName);
+    }
 });
 
-$mCommandClient->buildHelpCommand();
+$mCommandClient->buildDefaultHelpCommand();
 
 Env::get()->commandClient = $mCommandClient;

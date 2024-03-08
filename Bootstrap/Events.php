@@ -16,6 +16,7 @@ loopClasses(BOT_ROOT . '/Core/Events', static function (string $className) use (
         return;
     }
 
+    /** @var T|false */
     $attribute = doesClassHaveAttribute($className, Event::class);
 
     if (!$attribute) {
